@@ -1,70 +1,110 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
-function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+export default function Login({ onSwitchToSignup }) {
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+  });
 
-  const handleSubmit = async (e) => {
+  const [error, setError] = useState(''); // We'll now USE this value
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email || !password) {
+
+    if (!formData.username || !formData.password) {
       setError('Please fill in all fields');
       return;
     }
-    try {
-      const response = await axios.post('http://localhost:8000/login', { email, password });
-      // Handle success: e.g., store token in localStorage, redirect to dashboard
-      localStorage.setItem('token', response.data.token);
-      navigate('/'); // Redirect to home or dashboard
-    } catch {
-      setError('Invalid credentials');
-    }
+
+    // Clear previous error on successful validation
+    setError('');
+    console.log('Login submitted:', formData);
+    // Later: axios.post to FastAPI
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    // Optional: clear error when user starts typing
+    if (error) setError('');
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded shadow-md">
-        <h2 className="text-2xl font-bold text-center">Login to OD3</h2>
-        {error && <p className="text-red-500 text-center">{error}</p>}
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-teal-900 via-teal-800 to-slate-900 p-4">
+      <div className="w-full max-w-md">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+          {/* Title */}
+          <h1 className="text-center text-white uppercase tracking-wider mb-8">
+            User Login
+          </h1>
+
+          {/* Error Message */}
+          {error && (
+            <div className="text-center text-red-400 bg-red-900/30 px-4 py-3 rounded-full">
+              {error}
+            </div>
+          )}
+
+          {/* Username Input */}
+          <div className="relative flex items-center">
+            <div className="absolute left-0 w-14 h-14 bg-white rounded-full flex items-center justify-center z-10">
+              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="text"
+              name="username"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleInputChange}
+              className="w-full h-14 pl-16 pr-4 bg-slate-600/50 text-white placeholder:text-slate-400 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30"
               required
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+
+          {/* Password Input */}
+          <div className="relative flex items-center">
             <input
-              id="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className="w-full h-14 pl-4 pr-16 bg-slate-600/50 text-white placeholder:text-slate-400 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30"
               required
             />
+            <div className="absolute right-0 w-14 h-14 bg-white rounded-full flex items-center justify-center z-10">
+              <svg className="w-5 h-5 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
           </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-14 bg-white text-slate-900 rounded-full uppercase tracking-wide hover:bg-slate-100 transition-colors mt-8"
           >
             Login
           </button>
+
+          {/* Toggle to Sign Up */}
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={onSwitchToSignup}
+              className="text-white/80 hover:text-white underline"
+            >
+              Don't have an account? Sign Up
+            </button>
+          </div>
         </form>
-        <p className="text-sm text-center text-gray-600">
-          Don't have an account? <Link to="/signup" className="text-blue-600 hover:underline">Sign up</Link>
-        </p>
       </div>
     </div>
   );
 }
-
-export default Login;
