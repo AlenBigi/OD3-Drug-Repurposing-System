@@ -23,6 +23,11 @@ export default function Signup({ onSwitchToLogin }) {
     }
 
     setError('');
+    localStorage.setItem('token', 'fake-jwt-token-12345');
+    localStorage.setItem('username', formData.username);
+
+    // Redirect to homepage (App.jsx will detect token and show Home)
+    window.location.reload();
     console.log('Sign up submitted:', formData);
     // Later: axios.post('http://localhost:8000/signup', formData)
   };

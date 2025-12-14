@@ -18,6 +18,11 @@ export default function Login({ onSwitchToSignup }) {
 
     // Clear previous error on successful validation
     setError('');
+    localStorage.setItem('token', 'fake-jwt-token-12345');
+    localStorage.setItem('username', formData.username);
+
+    // Redirect to homepage (App.jsx will detect token and show Home)
+    window.location.reload();
     console.log('Login submitted:', formData);
     // Later: axios.post to FastAPI
   };
