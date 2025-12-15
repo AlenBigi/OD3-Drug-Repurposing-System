@@ -1,30 +1,12 @@
-
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from sqlalchemy import text
 import bcrypt
-import os
 
-from sqlalchemy import create_engine, text
-from dotenv import load_dotenv
+from database import engine
+from auth import create_access_token, get_current_user
+from models import SignupRequest, LoginRequest
 
-from jose import jwt, JWTError
-from datetime import datetime, timedelta
-
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
-
-
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES",60))
-
-
-engine = create_engine(DATABASE_URL)
 
 app = FastAPI()
 
@@ -37,58 +19,34 @@ app.add_middleware(
 )
 
 
-class SignupRequest(BaseModel):
-    username: str
-    password: str
-
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-def create_access_token(data: dict):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-
-
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        return username
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-
-
 @app.post("/signup")
 def signup(data: SignupRequest):
     with engine.connect() as conn:
-        # check if user exists
-        result = conn.execute(
+        user = conn.execute(
             text("SELECT id FROM users WHERE username = :username"),
-            {"username": data.username}
+            {"username": data.username},
         ).fetchone()
 
-        if result:
-            raise HTTPException(status_code=400, detail="Username already exists")
+        if user:
+            raise HTTPException(
+                status_code=400,
+                detail="Username already exists",
+            )
 
         hashed_pw = bcrypt.hashpw(
             data.password.encode("utf-8"),
-            bcrypt.gensalt()
+            bcrypt.gensalt(),
         ).decode("utf-8")
 
         conn.execute(
             text(
-                "INSERT INTO users (username, password_hash) VALUES (:username, :password)"
+                "INSERT INTO users (username, password_hash) "
+                "VALUES (:username, :password)"
             ),
-            {"username": data.username, "password": hashed_pw}
+            {
+                "username": data.username,
+                "password": hashed_pw,
+            },
         )
 
         conn.commit()
@@ -100,29 +58,43 @@ def signup(data: SignupRequest):
 def login(data: LoginRequest):
     with engine.connect() as conn:
         result = conn.execute(
-            text("SELECT password_hash FROM users WHERE username = :username"),
-            {"username": data.username}
+            text(
+                "SELECT password_hash FROM users "
+                "WHERE username = :username"
+            ),
+            {"username": data.username},
         ).fetchone()
 
         if not result:
-            raise HTTPException(status_code=400, detail="Invalid credentials")
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid credentials",
+            )
 
         stored_hash = result[0].encode("utf-8")
 
-        if not bcrypt.checkpw(data.password.encode("utf-8"), stored_hash):
-            raise HTTPException(status_code=400, detail="Invalid credentials")
+        if not bcrypt.checkpw(
+            data.password.encode("utf-8"),
+            stored_hash,
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid credentials",
+            )
 
     token = create_access_token({"sub": data.username})
 
     return {
         "access_token": token,
-        "token_type": "bearer"
+        "token_type": "bearer",
     }
 
-@app.get("/")
-def root():
-    return {"status": "backend running"}
 
 @app.get("/me")
 def read_me(current_user: str = Depends(get_current_user)):
     return {"username": current_user}
+
+
+@app.get("/")
+def root():
+    return {"status": "backend running"}
