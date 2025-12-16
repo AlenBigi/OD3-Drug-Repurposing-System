@@ -9,7 +9,7 @@ export default function Signup({ onSwitchToLogin }) {
 
   const [error, setError] = useState(''); // Now used in JSX below
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.username || !formData.password || !formData.confirmPassword) {
@@ -23,13 +23,33 @@ export default function Signup({ onSwitchToLogin }) {
     }
 
     setError('');
-    localStorage.setItem('token', 'fake-jwt-token-12345');
-    localStorage.setItem('username', formData.username);
 
-    // Redirect to homepage (App.jsx will detect token and show Home)
-    window.location.reload();
-    console.log('Sign up submitted:', formData);
-    // Later: axios.post('http://localhost:8000/signup', formData)
+    try {
+      const res = await fetch('http://127.0.0.1:8000/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.detail || 'Signup failed');
+        return;
+      }
+
+      // TEMP success handling (same as before)
+      // Signup successful → go to login
+      onSwitchToLogin();
+
+    } catch (err) {
+      setError('Cannot connect to server');
+    }
   };
 
   const handleInputChange = (e) => {

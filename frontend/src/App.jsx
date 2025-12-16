@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import Login from './components/Login.jsx';
 import Signup from './components/Signup.jsx';
-import Home from './components/Home.jsx';  
+import Home from './components/Home.jsx';
 
 function App() {
   const [isLogin, setIsLogin] = useState(true);
 
-  // Fake auth check
-  const token = localStorage.getItem('token');
+  // Auth check
+  const token = localStorage.getItem('access_token');
+
 
   if (token) {
-    return <Home />;  
+    return <Home />;
   }
 
   // Show auth screens if not logged in

@@ -4,8 +4,8 @@ function Home() {
   const username = localStorage.getItem('username') || 'Researcher';
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("username");
     window.location.reload();
   };
 

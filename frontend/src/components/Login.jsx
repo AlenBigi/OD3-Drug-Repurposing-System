@@ -8,7 +8,7 @@ export default function Login({ onSwitchToSignup }) {
 
   const [error, setError] = useState(''); // We'll now USE this value
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.username || !formData.password) {
@@ -16,15 +16,40 @@ export default function Login({ onSwitchToSignup }) {
       return;
     }
 
-    // Clear previous error on successful validation
     setError('');
-    localStorage.setItem('token', 'fake-jwt-token-12345');
-    localStorage.setItem('username', formData.username);
 
-    // Redirect to homepage (App.jsx will detect token and show Home)
-    window.location.reload();
-    console.log('Login submitted:', formData);
-    // Later: axios.post to FastAPI
+    try {
+      const res = await fetch('http://127.0.0.1:8000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.detail || 'Login failed');
+        return;
+      }
+
+      // Store real JWT
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('username', formData.username);
+
+      // Temporary navigation handling
+      window.location.reload();
+
+
+
+
+    } catch (err) {
+      setError('Cannot connect to server');
+    }
   };
 
   const handleInputChange = (e) => {
