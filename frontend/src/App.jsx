@@ -1,29 +1,33 @@
-import { useState } from 'react';
-import Login from './components/Login.jsx';
-import Signup from './components/Signup.jsx';
-import Home from './components/Home.jsx';
+import { Routes, Route, Navigate } from "react-router-dom";
+import Login from "./components/Login.jsx";
+import Signup from "./components/Signup.jsx";
+import Home from "./components/Home.jsx";
+import DiseaseSearch from "./components/Disease.jsx";
 
-function App() {
-  const [isLogin, setIsLogin] = useState(true);
+export default function App() {
+  const token = localStorage.getItem("access_token");
 
-  // Auth check
-  const token = localStorage.getItem('access_token');
-
-
-  if (token) {
-    return <Home />;
-  }
-
-  // Show auth screens if not logged in
   return (
-    <>
-      {isLogin ? (
-        <Login onSwitchToSignup={() => setIsLogin(false)} />
-      ) : (
-        <Signup onSwitchToLogin={() => setIsLogin(true)} />
-      )}
-    </>
+    <Routes>
+      {/* Public routes */}
+      <Route
+        path="/"
+        element={token ? <Navigate to="/home" /> : <Login />}
+      />
+      <Route
+        path="/signup"
+        element={token ? <Navigate to="/home" /> : <Signup />}
+      />
+
+      {/* Protected routes */}
+      <Route
+        path="/home"
+        element={token ? <Home /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/diseases"
+        element={token ? <DiseaseSearch /> : <Navigate to="/" />}
+      />
+    </Routes>
   );
 }
-
-export default App;

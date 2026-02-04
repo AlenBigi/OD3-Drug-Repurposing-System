@@ -47,7 +47,7 @@ export default function Signup({ onSwitchToLogin }) {
       // Signup successful → go to login
       onSwitchToLogin();
 
-    } catch (err) {
+    } catch {
       setError('Cannot connect to server');
     }
   };

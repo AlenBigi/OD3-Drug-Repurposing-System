@@ -47,7 +47,7 @@ export default function Login({ onSwitchToSignup }) {
 
 
 
-    } catch (err) {
+    } catch {
       setError('Cannot connect to server');
     }
   };
