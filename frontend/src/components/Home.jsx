@@ -40,9 +40,12 @@ function Home() {
           <nav className="p-6">
             <ul className="space-y-2">
               <li>
-                <a href="#" className="block py-3 px-4 rounded-lg bg-white/10 text-white font-medium">
-                  Dashboard
-                </a>
+                <button
+                  onClick={() => navigate("/home")}
+                  className="w-full text-left block py-3 px-4 rounded-lg bg-white/10 font-medium"
+                >
+                Dashboard
+                </button>
               </li>
               <li>
                 <a href="#" className="block py-3 px-4 rounded-lg hover:bg-white/10 transition">
@@ -50,10 +53,14 @@ function Home() {
                 </a>
               </li>
               <li>
-                <a href="#" className="block py-3 px-4 rounded-lg hover:bg-white/10 transition">
-                  Disease Explorer
-                </a>
+                <button
+                  onClick={() => navigate("/diseases")}
+                  className="w-full text-left block py-3 px-4 rounded-lg hover:bg-white/10 transition"
+                >
+                Disease Explorer
+                </button>
               </li>
+
               <li>
                 <a href="#" className="block py-3 px-4 rounded-lg hover:bg-white/10 transition">
                   Reports
@@ -74,18 +81,23 @@ function Home() {
               Analyze molecular structures and genomic signals to identify high-potential repurposable drugs.
             </p>
 
-            <div className="flex justify-center gap-6">
-              <button className="px-10 py-4 bg-white text-teal-900 rounded-full font-semibold hover:bg-gray-100 transition text-lg">
+            <div className="flex justify-center">
+              <button
+                //onClick={() => navigate("/")}
+                className="
+                  px-16 py-6
+                  bg-white text-teal-900
+                  rounded-full
+                  text-2xl font-bold tracking-wide
+                  hover:bg-gray-100 hover:scale-105
+                  transition-all duration-300
+                  shadow-xl
+                "
+              >
                 Start Analysis
               </button>
-              <button
-                onClick={() => navigate("/diseases")}
-                className="px-10 py-4 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full font-semibold transition text-lg border border-white/30"
-              >
-                Explore Diseases
-              </button>
-
             </div>
+
           </section>
 
           {/* Core Feature Cards */}
