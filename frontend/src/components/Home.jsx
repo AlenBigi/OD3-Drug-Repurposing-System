@@ -1,6 +1,10 @@
 //import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+
 
 function Home() {
+  const navigate = useNavigate();
+
   const username = localStorage.getItem('username') || 'Researcher';
 
   const handleLogout = () => {
@@ -74,9 +78,13 @@ function Home() {
               <button className="px-10 py-4 bg-white text-teal-900 rounded-full font-semibold hover:bg-gray-100 transition text-lg">
                 Start Analysis
               </button>
-              <button className="px-10 py-4 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full font-semibold transition text-lg border border-white/30">
+              <button
+                onClick={() => navigate("/diseases")}
+                className="px-10 py-4 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full font-semibold transition text-lg border border-white/30"
+              >
                 Explore Diseases
               </button>
+
             </div>
           </section>
 

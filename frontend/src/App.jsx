@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "./components/Login.jsx";
-import Signup from "./components/Signup.jsx";
-import Home from "./components/Home.jsx";
-import DiseaseSearch from "./components/Disease.jsx";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
+import Home from "./components/Home";
+import DiseaseSearch from "./components/Disease";
 
 export default function App() {
   const token = localStorage.getItem("access_token");

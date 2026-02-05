@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 
-export default function Login({ onSwitchToSignup }) {
+
+export default function Login() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -41,8 +45,7 @@ export default function Login({ onSwitchToSignup }) {
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('username', formData.username);
 
-      // Temporary navigation handling
-      window.location.reload();
+      window.location.href = "/home";
 
 
 
@@ -127,11 +130,12 @@ export default function Login({ onSwitchToSignup }) {
           <div className="text-center">
             <button
               type="button"
-              onClick={onSwitchToSignup}
+              onClick={() => navigate("/signup")}
               className="text-white/80 hover:text-white underline"
             >
-              Don't have an account? Sign Up
+            Don't have an account? Sign Up
             </button>
+
           </div>
         </form>
       </div>
