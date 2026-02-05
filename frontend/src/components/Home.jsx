@@ -83,19 +83,12 @@ function Home() {
 
             <div className="flex justify-center">
               <button
-                //onClick={() => navigate("/")}
-                className="
-                  px-16 py-6
-                  bg-white text-teal-900
-                  rounded-full
-                  text-2xl font-bold tracking-wide
-                  hover:bg-gray-100 hover:scale-105
-                  transition-all duration-300
-                  shadow-xl
-                "
+                onClick={() => navigate("/analysis")}
+                className="px-20 py-6 bg-white text-teal-900 rounded-full font-bold text-xl hover:bg-gray-100 transition"
               >
                 Start Analysis
               </button>
+
             </div>
 
           </section>
