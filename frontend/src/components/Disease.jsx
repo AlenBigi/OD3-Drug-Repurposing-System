@@ -73,8 +73,8 @@ export default function DiseaseSearch() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-12">
           {/* Title */}
-          <h1 className="text-3xl tracking-widest font-light mb-10">
-            DISEASE SEARCH
+          <h1 className="text-4xl font-bold mb-12">
+            Disease Search
           </h1>
 
           {/* Search Bar */}
