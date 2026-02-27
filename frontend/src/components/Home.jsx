@@ -44,20 +44,23 @@ function Home() {
                   onClick={() => navigate("/home")}
                   className="w-full text-left block py-3 px-4 rounded-lg bg-white/10 font-medium"
                 >
-                Dashboard
+                  Home
                 </button>
               </li>
               <li>
-                <a href="#" className="block py-3 px-4 rounded-lg hover:bg-white/10 transition">
+                <button
+                  onClick={() => navigate("/analysis")}
+                  className="w-full text-left block py-3 px-4 rounded-lg hover:bg-white/10 transition"
+                >
                   Drug Analysis
-                </a>
+                </button>
               </li>
               <li>
                 <button
                   onClick={() => navigate("/diseases")}
                   className="w-full text-left block py-3 px-4 rounded-lg hover:bg-white/10 transition"
                 >
-                Disease Explorer
+                  Disease Explorer
                 </button>
               </li>
 
@@ -135,7 +138,10 @@ function Home() {
           <section className="text-center py-16 bg-white/5 backdrop-blur-lg rounded-3xl border border-white/10">
             <h3 className="text-3xl font-bold mb-6">Ready to Discover New Treatments?</h3>
             <div className="flex justify-center gap-6">
-              <button className="px-10 py-4 bg-white text-teal-900 rounded-full font-semibold hover:bg-gray-100 transition text-lg">
+              <button
+                onClick={() => navigate("/analysis")}
+                className="px-10 py-4 bg-white text-teal-900 rounded-full font-semibold hover:bg-gray-100 transition text-lg"
+              >
                 Run New Analysis
               </button>
               <button className="px-10 py-4 bg-transparent border-2 border-white rounded-full font-semibold hover:bg-white/10 transition text-lg">
