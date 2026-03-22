@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from disease_to_drug import predict_drugs_for_disease
 from sqlalchemy import text
 import bcrypt
 
@@ -18,6 +20,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class DiseaseRequest(BaseModel):
+    disease_name: str
+
+@app.post("/predict")
+def predict(request: DiseaseRequest):
+    return predict_drugs_for_disease(request.disease_name)
 
 @app.post("/signup")
 def signup(data: SignupRequest):

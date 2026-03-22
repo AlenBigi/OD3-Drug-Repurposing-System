@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { predictDrugs } from "../services/api";
 
 export default function Analysis() {
   const navigate = useNavigate();
@@ -16,41 +16,32 @@ export default function Analysis() {
     window.location.reload();
   };
 
-  const runAnalysis = async () => {
-    if (!disease.trim()) {
-      setError("Please enter a disease name");
-      return;
-    }
+const runAnalysis = async () => {
+  if (!disease.trim()) {
+    setError("Please enter a disease name");
+    return;
+  }
 
-    setLoading(true);
-    setError("");
-    setResults([]);
+  setLoading(true);
+  setError("");
+  setResults([]);
 
-    try {
-      const res = await fetch("http://127.0.0.1:8000/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          disease_name: disease,
-        }),
-      });
+  try {                                                                                                           `                                                                                                                                                                                                                                    `
+    const data = await predictDrugs(disease);
+    console.log("API RESPONSE:", data);
 
-      const data = await res.json();
+    setResults(data.top_drugs);
+  } catch (err) {
+  console.error("FULL ERROR:", err);
+  setError(err.message || "Error in running analysis");
 
-      if (!res.ok) {
-        setError("Prediction failed");
-        return;
-      }
 
-      setResults(data.top_drugs);
-    } catch {
-      setError("Backend not reachable");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   return (
     <div className="min-h-screen bg-linear-to-br from-teal-900 via-teal-800 to-slate-900 text-white flex flex-col">
@@ -118,15 +109,15 @@ export default function Analysis() {
             Drug Repurposing Analysis
           </h1>
 
-          {/* Input */}
-          <div className="max-w-2xl mx-auto">
-            <input
-              type="text"
-              value={disease}
-              onChange={(e) => setDisease(e.target.value)}
-              placeholder="Enter disease name (e.g. Farber disease)"
-              className="w-full px-6 py-4 rounded-full bg-white/20 outline-none"
-            />
+      {/* Input */}
+      <div className="max-w-2xl mx-auto">
+        <input
+          type="text"
+          value={disease}
+          onChange={(e) => setDisease(e.target.value)}
+          placeholder="Enter orphan disease (e.g. Farber disease)"
+          className="w-full px-6 py-4 rounded-full bg-white/20 outline-none"
+        />
 
             <button
               onClick={runAnalysis}
@@ -140,37 +131,97 @@ export default function Analysis() {
             )}
           </div>
 
-          {/* Results */}
-          {results.length > 0 && (
-            <div className="mt-16 max-w-5xl mx-auto bg-white/10 border border-white/20 rounded-2xl p-8">
-              <h2 className="text-2xl font-semibold mb-6">
-                Top Drug Candidates
-              </h2>
+      {/* Results */}
+      {results.length > 0 && (
+        <div className="mt-16 max-w-6xl mx-auto bg-white/10 border border-white/20 rounded-2xl p-8">
+          <h2 className="text-2xl font-semibold mb-6">
+            Top 10 Ranked Drug Candidates
+          </h2>
 
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/20">
-                    <th className="py-2">Rank</th>
-                    <th className="py-2">SMILES</th>
-                    <th className="py-2">Affinity Score</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map((drug, idx) => (
-                    <tr key={idx} className="border-b border-white/10">
-                      <td className="py-2">{idx + 1}</td>
-                      <td className="py-2 font-mono text-sm break-all">
-                        {drug.smiles}
-                      </td>
-                      <td className="py-2">{drug.score.toFixed(4)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </main>
-      </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/20">
+                <th className="py-3">Rank</th>
+                <th className="py-3">SMILES</th>
+                <th className="py-3">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.map((drug, idx) => {
+
+  // 🔹 Convert score (0–5) → percentage
+  const confidence = Math.round((drug.score / 5) * 100);
+
+  // 🔹 Rank badge logic
+  let badge = null;
+  if (idx === 0) badge = "🥇 Top-1";
+  else if (idx < 3) badge = "🥈 Top-3";
+  else if (idx < 5) badge = "🥉 Top-5";
+
+  // 🔹 Confidence bar color
+  const barColor =
+    confidence >= 75 ? "bg-green-400"
+    : confidence >= 50 ? "bg-yellow-400"
+    : "bg-red-400";
+
+  return (
+    <tr key={idx} className="border-b border-white/10">
+      <td className="py-2">
+  <div className="font-semibold">{idx + 1}</div>
+  {badge && (
+    <div className="text-xs text-teal-300 mt-1">
+      {badge}
+    </div>
+  )}
+</td>
+
+
+      <td className="py-2 font-mono text-sm break-all">
+        {drug.smiles}
+      </td>
+
+      <td className="py-2">
+  {/* 🔹 Score + Confidence */}
+  <div className="flex justify-between text-xs text-white/80 mb-1">
+    <span>Score: {drug.score.toFixed(4)}</span>
+    <span>{confidence}%</span>
+  </div>
+
+  {/* 🔹 Confidence bar */}
+  <div className="w-full bg-white/20 rounded-full h-3">
+    <div
+      className={`${barColor} h-3 rounded-full transition-all duration-500`}
+      style={{ width: `${confidence}%` }}
+      title={
+        confidence >= 75
+          ? "High binding likelihood"
+          : confidence >= 50
+          ? "Moderate binding likelihood"
+          : "Low binding likelihood"
+      }
+    />
+  </div>
+
+  {/* 🔹 Explanation text */}
+  <p className="text-xs mt-2 text-white/70">
+    {confidence >= 75 &&
+      "Strong predicted interaction with disease-associated targets."}
+    {confidence >= 50 && confidence < 75 &&
+      "Moderate interaction; potential repurposing candidate."}
+    {confidence < 50 &&
+      "Lower interaction confidence; exploratory candidate."}
+  </p>
+</td>
+
+      
+    </tr>
+  );
+})}
+
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
