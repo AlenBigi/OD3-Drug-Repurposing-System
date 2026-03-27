@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from disease_to_drug import predict_drugs_for_disease
 from sqlalchemy import text
 import bcrypt
+import json
 
 from database import engine
 from auth import create_access_token, get_current_user
@@ -20,8 +21,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+with open("data/processed/disease_dataset.json", "r", encoding="utf-8") as f:
+    disease_data = json.load(f)
+
 class DiseaseRequest(BaseModel):
     disease_name: str
+
+@app.get("/disease/{orpha_id}")
+def get_disease(orpha_id: str):
+    return disease_data.get(orpha_id, {"error": "Disease not found"})
+
+@app.get("/search")
+def search_disease(query: str):
+    results = []
+
+    for orpha_id, d in disease_data.items():
+        if d["name"] and query.lower() in d["name"].lower():
+            results.append({
+                "orpha_id": orpha_id,
+                "name": d["name"]
+            })
+
+        if len(results) >= 10:
+            break
+
+    return results
 
 @app.post("/predict")
 def predict(request: DiseaseRequest):
