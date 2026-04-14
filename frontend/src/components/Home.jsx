@@ -63,12 +63,6 @@ function Home() {
                   Disease Explorer
                 </button>
               </li>
-
-              <li>
-                <a href="#" className="block py-3 px-4 rounded-lg hover:bg-white/10 transition">
-                  Reports
-                </a>
-              </li>
             </ul>
           </nav>
         </aside>
@@ -144,8 +138,11 @@ function Home() {
               >
                 Run New Analysis
               </button>
-              <button className="px-10 py-4 bg-transparent border-2 border-white rounded-full font-semibold hover:bg-white/10 transition text-lg">
-                Upload Molecular Data
+              <button 
+                onClick={() => navigate("/diseases")}
+                className="px-10 py-4 bg-transparent border-2 border-white rounded-full font-semibold hover:bg-white/10 transition text-lg"
+              >
+                Explore diseases
               </button>
             </div>
           </section>
