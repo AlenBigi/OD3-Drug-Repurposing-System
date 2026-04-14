@@ -42,7 +42,7 @@ export default function Analysis() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-900 via-teal-800 to-slate-900 text-white flex flex-col">
+    <div className="min-h-screen bg-linear-to-br from-teal-900 via-teal-800 to-slate-900 text-white flex flex-col">
 
       {/* HEADER */}
       <header className="bg-white/5 backdrop-blur-lg border-b border-white/10 px-8 py-5 flex justify-between items-center">
