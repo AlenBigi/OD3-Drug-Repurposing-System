@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { predictDrugs } from "../services/api";
+import MoleculeViewer from "./MoleculeViewer";
+import Molecule3D from "./Molecule3D";
 
 export default function Analysis() {
   const navigate = useNavigate();
@@ -140,7 +142,7 @@ export default function Analysis() {
                 <thead>
                   <tr className="border-b border-white/20">
                     <th className="py-3">Rank</th>
-                    <th className="py-3">SMILES</th>
+                    <th className="py-3">Molecular Structure</th>
                     <th className="py-3">Score</th>
                   </tr>
                 </thead>
@@ -173,7 +175,7 @@ export default function Analysis() {
                         </td>
 
                         <td className="py-2 font-mono text-sm break-all">
-                          {drug.smiles}
+                          <Molecule3D smiles={drug.smiles} />
                         </td>
 
                         <td className="py-2">

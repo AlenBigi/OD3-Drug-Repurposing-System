@@ -11,6 +11,38 @@ from auth import create_access_token, get_current_user
 from models import SignupRequest, LoginRequest
 
 
+from rdkit import Chem
+from rdkit.Chem import AllChem
+
+def smiles_to_3d(smiles):
+    try:
+        mol = Chem.MolFromSmiles(smiles)
+
+        if mol is None:
+            print(f"[INVALID SMILES] {smiles}")
+            return None
+
+        mol = Chem.AddHs(mol)
+
+        # 🔥 USE BETTER EMBEDDING
+        params = AllChem.ETKDG()
+        params.randomSeed = 42
+
+        success = AllChem.EmbedMolecule(mol, params)
+
+        if success != 0:
+            print(f"[EMBED FAILED] {smiles}")
+            return None
+
+        AllChem.UFFOptimizeMolecule(mol)
+
+        return Chem.MolToMolBlock(mol)
+
+    except Exception as e:
+        print(f"[ERROR] {smiles} → {e}")
+        return None
+
+
 app = FastAPI()
 
 app.add_middleware(
@@ -26,6 +58,18 @@ with open("data/processed/disease_dataset.json", "r", encoding="utf-8") as f:
 
 class DiseaseRequest(BaseModel):
     disease_name: str
+
+
+
+@app.get("/mol3d")
+def get_3d(smiles: str):
+    mol_block = smiles_to_3d(smiles)
+
+    return {
+        "mol": mol_block,
+        "success": mol_block is not None
+    }
+
 
 @app.get("/disease/{orpha_id}")
 def get_disease(orpha_id: str):
