@@ -11,8 +11,16 @@ export default function Analysis() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [visualized, setVisualized] = useState({});
 
   const username = localStorage.getItem("username") || "Researcher";
+
+  const toggleVisualize = (index) => {
+    setVisualized(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -174,8 +182,30 @@ export default function Analysis() {
                           )}
                         </td>
 
-                        <td className="py-2 font-mono text-sm break-all">
-                          <Molecule3D smiles={drug.smiles} />
+                        <td className="py-2 text-sm">
+                          {!visualized[idx] ? (
+                            <div>
+                              <p className="font-mono break-all">{drug.smiles}</p>
+
+                              <button
+                                onClick={() => toggleVisualize(idx)}
+                                className="mt-2 px-3 py-1 bg-white text-teal-900 rounded-md text-xs"
+                              >
+                                Visualize
+                              </button>
+                            </div>
+                          ) : (
+                            <div>
+                              <MoleculeViewer smiles={drug.smiles} />
+
+                              <button
+                                onClick={() => toggleVisualize(idx)}
+                                className="mt-2 px-3 py-1 bg-white text-teal-900 rounded-md text-xs"
+                              >
+                                Show SMILES
+                              </button>
+                            </div>
+                          )}
                         </td>
 
                         <td className="py-2">
