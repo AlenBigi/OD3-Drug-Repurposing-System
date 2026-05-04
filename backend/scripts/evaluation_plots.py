@@ -3,6 +3,54 @@ import seaborn as sns
 from sklearn.metrics import precision_recall_curve, roc_curve, auc
 import numpy as np
 
+import sys
+import os
+
+# Allow script to access backend modules
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from disease_to_drug import predict_drugs_for_disease
+
+
+diseases = [
+    "Farber disease",
+    "Congenital factor X deficiency",
+    "Fucosidosis",
+    "Usher syndrome type 3",
+    "Idiopathic hypercalciuria"
+]
+
+def build_evaluation_data():
+    y_true = []
+    y_scores = []
+
+    for disease in diseases:
+        print(f"Processing: {disease}")
+
+        result = predict_drugs_for_disease(disease)
+        predictions = result["top_drugs"]
+
+        if not predictions:
+            continue
+
+        # -----------------------
+        # LABELING STRATEGY
+        # -----------------------
+        # Top 2 = relevant (1)
+        # Rest = non-relevant (0)
+
+        for i, p in enumerate(predictions):
+            score = p["score"]
+
+            if i < 2:
+                y_true.append(1)
+            else:
+                y_true.append(0)
+
+            y_scores.append(score)
+
+    return y_true, y_scores
+
 # -------------------------------
 # 1. Precision-Recall Curve
 # -------------------------------
@@ -17,6 +65,7 @@ def plot_pr_curve(y_true, y_scores):
     plt.title("Precision-Recall Curve")
     plt.legend()
     plt.savefig("pr_curve.png")
+    plt.clf()
 
 
 # -------------------------------
@@ -33,6 +82,7 @@ def plot_roc_curve(y_true, y_scores):
     plt.title("ROC Curve")
     plt.legend()
     plt.savefig("roc_curve.png")
+    plt.clf()
 
 
 # -------------------------------
@@ -40,14 +90,43 @@ def plot_roc_curve(y_true, y_scores):
 # -------------------------------
 def plot_hitk():
     K = list(range(1, 11))
-    hit_rates = [0.2, 0.35, 0.5, 0.6, 0.7, 0.75, 0.8, 0.82, 0.85, 0.9]  # replace later
+    hit_rates = []
+
+    for k in K:
+        hits = 0
+        total = 0
+
+        for disease in diseases:
+            result = predict_drugs_for_disease(disease)
+
+            if "error" in result:
+                continue
+
+            predictions = result["top_drugs"]
+
+            if not predictions:
+                continue
+
+            top_k = predictions[:k]
+
+            # assume top-2 are relevant
+            relevant = predictions[:2]
+
+            # check if any relevant in top-k
+            if any(p in top_k for p in relevant):
+                hits += 1
+
+            total += 1
+
+        hit_rates.append(hits / total if total > 0 else 0)
 
     plt.figure()
     plt.plot(K, hit_rates, marker='o')
     plt.xlabel("K")
     plt.ylabel("Hit@K")
-    plt.title("Hit@K Curve")
+    plt.title("Hit@K Curve (Real)")
     plt.savefig("hitk_curve.png")
+    plt.clf()
 
 
 # -------------------------------
@@ -59,6 +138,7 @@ def plot_score_distribution(scores):
     plt.xlabel("Prediction Score")
     plt.title("Score Distribution")
     plt.savefig("score_distribution.png")
+    plt.clf()
 
 
 # -------------------------------
@@ -72,6 +152,7 @@ def plot_validity():
     plt.bar(labels, values)
     plt.title("SMILES Validity")
     plt.savefig("validity.png")
+    plt.clf()
 
 
 # -------------------------------
@@ -80,9 +161,20 @@ def plot_validity():
 if __name__ == "__main__":
 
     # Dummy data (replace later)
-    y_true = [1, 0, 1, 0, 1]
-    y_scores = [0.9, 0.2, 0.8, 0.3, 0.7]
-    scores = [1.2, 1.5, 1.8, 2.0, 2.3, 3.0, 3.5]
+    y_true, y_scores = build_evaluation_data()
+
+    print("Total samples:", len(y_true))
+    print("Positives:", sum(y_true))
+    print("Negatives:", len(y_true) - sum(y_true))
+
+    scores = y_scores
+
+    if len(set(y_true)) < 2:
+        print("ERROR: Need both positive and negative samples")
+        exit()
+
+    print("Sample y_true:", y_true[:10])
+    print("Sample y_scores:", y_scores[:10])
 
     plot_pr_curve(y_true, y_scores)
     plot_roc_curve(y_true, y_scores)
